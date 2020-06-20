@@ -1,9 +1,10 @@
-package com.gmail.sbrunet102.smack
+package com.gmail.sbrunet102.smack.controller
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import com.gmail.sbrunet102.smack.R
 import kotlinx.android.synthetic.main.activity_create_user.*
 import java.util.*
 
