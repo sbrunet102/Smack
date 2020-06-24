@@ -7,6 +7,9 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
@@ -51,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 //        navView.setupWithNavController(navController)
+
+        hideKeyBoard()
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
             userDataChangeReceiver,
@@ -105,12 +110,37 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelClicked(view: View) {
+        if(AuthService.isLoggedIn){
+            val builder = AlertDialog.Builder(this)
+            val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog,null)
+            builder.setView(dialogView)
+                .setPositiveButton("Add"){dialogInterface, i ->
+                    // perform some logic when clicked
+                    val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
+                    val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDscTxt)
+                    val channelName = nameTextField.text.toString()
+                    val channelDesc = descTextField.text.toString()
 
+                    // create channel with channel anme and description
+                    hideKeyBoard()
+                }
+                .setNegativeButton("Cancel"){dialogInterface, i ->  
+                    // cancel and close the dialog
+                    hideKeyBoard()
+                }
+                .show()
+        }
     }
 
     fun sendMsgBtnClicked(view: View) {
 
     }
 
+    fun hideKeyBoard(){
+        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        if(inputManager.isAcceptingText){
+            inputManager.hideSoftInputFromWindow(currentFocus.windowToken,0)
+        }
+    }
 
 }
