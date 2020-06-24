@@ -33,8 +33,11 @@ class MainActivityCopy : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        appBarConfiguration = AppBarConfiguration(setOf(
-                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow), drawerLayout)
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow
+            ), drawerLayout
+        )
         setupActionBarWithNavController(navController, appBarConfiguration)
 //        navView.setupWithNavController(navController)
     }
@@ -50,18 +53,20 @@ class MainActivityCopy : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
-    fun loginBtnNavClicked(view: View){
-        val loginIntent = Intent(this,
-            LoginActivity::class.java)
+    fun loginBtnNavClicked(view: View) {
+        val loginIntent = Intent(
+            this,
+            LoginActivity::class.java
+        )
         startActivity(loginIntent)
 
     }
 
-    fun addChannelClicked(view: View){
+    fun addChannelClicked(view: View) {
 
     }
 
-    fun sendMsgBtnClicked(view: View){
+    fun sendMsgBtnClicked(view: View) {
 
     }
 

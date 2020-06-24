@@ -74,7 +74,8 @@ class CreateUserActivity : AppCompatActivity() {
                             ) { createSuccess ->
                                 if (createSuccess) {
                                     val userDataChange = Intent(BROADCAST_USER_DATA_CHANGE)
-                                    LocalBroadcastManager.getInstance(this).sendBroadcast(userDataChange)
+                                    LocalBroadcastManager.getInstance(this)
+                                        .sendBroadcast(userDataChange)
                                     enableSpinner(false)
                                     finish()
                                 } else {
@@ -89,8 +90,12 @@ class CreateUserActivity : AppCompatActivity() {
                     errorToast()
                 }
             }
-        }else{
-            Toast.makeText(this, "Make sure user name, email and password are filled in.", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(
+                this,
+                "Make sure user name, email and password are filled in.",
+                Toast.LENGTH_LONG
+            ).show()
             enableSpinner(false)
         }
     }
