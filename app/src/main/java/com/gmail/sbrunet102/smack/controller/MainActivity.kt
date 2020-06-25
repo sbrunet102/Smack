@@ -23,11 +23,15 @@ import com.gmail.sbrunet102.smack.R
 import com.gmail.sbrunet102.smack.services.AuthService
 import com.gmail.sbrunet102.smack.services.UserDataService
 import com.gmail.sbrunet102.smack.utilities.BROADCAST_USER_DATA_CHANGE
+import com.gmail.sbrunet102.smack.utilities.SOCKET_URL
+import io.socket.client.IO
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
+
+    val socket = IO.socket(SOCKET_URL)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,14 +58,25 @@ class MainActivity : AppCompatActivity() {
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
 //        navView.setupWithNavController(navController)
+    }
 
-        hideKeyBoard()
-
+    override fun onResume() {
         LocalBroadcastManager.getInstance(this).registerReceiver(
             userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE)
         )
+        socket.connect()
+        super.onResume()
+    }
 
+    override fun onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        socket.disconnect()
+        super.onDestroy()
     }
 
     private val userDataChangeReceiver = object : BroadcastReceiver() {
@@ -110,11 +125,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun addChannelClicked(view: View) {
-        if(AuthService.isLoggedIn){
+        if (AuthService.isLoggedIn) {
             val builder = AlertDialog.Builder(this)
-            val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog,null)
+            val dialogView = layoutInflater.inflate(R.layout.add_channel_dialog, null)
             builder.setView(dialogView)
-                .setPositiveButton("Add"){dialogInterface, i ->
+                .setPositiveButton("Add") { dialogInterface, i ->
                     // perform some logic when clicked
                     val nameTextField = dialogView.findViewById<EditText>(R.id.addChannelNameTxt)
                     val descTextField = dialogView.findViewById<EditText>(R.id.addChannelDscTxt)
@@ -122,24 +137,25 @@ class MainActivity : AppCompatActivity() {
                     val channelDesc = descTextField.text.toString()
 
                     // create channel with channel anme and description
-                    hideKeyBoard()
+                    socket.emit("newChannel",channelName,channelDesc)
+
                 }
-                .setNegativeButton("Cancel"){dialogInterface, i ->  
+                .setNegativeButton("Cancel") { dialogInterface, i ->
                     // cancel and close the dialog
-                    hideKeyBoard()
+
                 }
                 .show()
         }
     }
 
     fun sendMsgBtnClicked(view: View) {
-
+        hideKeyBoard()
     }
 
-    fun hideKeyBoard(){
+    fun hideKeyBoard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        if(inputManager.isAcceptingText){
-            inputManager.hideSoftInputFromWindow(currentFocus.windowToken,0)
+        if (inputManager.isAcceptingText) {
+            inputManager.hideSoftInputFromWindow(currentFocus.windowToken, 0)
         }
     }
 
