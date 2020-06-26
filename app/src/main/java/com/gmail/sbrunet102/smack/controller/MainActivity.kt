@@ -20,11 +20,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.gmail.sbrunet102.smack.R
+import com.gmail.sbrunet102.smack.model.Channel
 import com.gmail.sbrunet102.smack.services.AuthService
+import com.gmail.sbrunet102.smack.services.MessageService
 import com.gmail.sbrunet102.smack.services.UserDataService
 import com.gmail.sbrunet102.smack.utilities.BROADCAST_USER_DATA_CHANGE
 import com.gmail.sbrunet102.smack.utilities.SOCKET_URL
 import io.socket.client.IO
+import io.socket.emitter.Emitter
 import kotlinx.android.synthetic.main.nav_header_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -38,6 +41,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
+
+        socket.connect()
+        socket.on("channelCreated", onNewChannel)
 
 //        val fab: FloatingActionButton = findViewById(R.id.fab)
 //        fab.setOnClickListener { view ->
@@ -65,16 +71,12 @@ class MainActivity : AppCompatActivity() {
             userDataChangeReceiver,
             IntentFilter(BROADCAST_USER_DATA_CHANGE)
         )
-        socket.connect()
+
         super.onResume()
     }
 
-    override fun onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
-        super.onPause()
-    }
-
     override fun onDestroy() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(userDataChangeReceiver)
         socket.disconnect()
         super.onDestroy()
     }
@@ -137,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                     val channelDesc = descTextField.text.toString()
 
                     // create channel with channel anme and description
-                    socket.emit("newChannel",channelName,channelDesc)
+                    socket.emit("newChannel", channelName, channelDesc)
 
                 }
                 .setNegativeButton("Cancel") { dialogInterface, i ->
@@ -145,6 +147,20 @@ class MainActivity : AppCompatActivity() {
 
                 }
                 .show()
+        }
+    }
+
+    private val onNewChannel = Emitter.Listener { args ->
+        runOnUiThread {
+            val channelName = args[0] as String
+            val channelDescription = args[1] as String
+            val channelId = args[2] as String
+
+            val newChannel = Channel(channelName, channelDescription, channelId)
+            MessageService.channels.add(newChannel)
+            println(newChannel.name)
+            println(newChannel.description)
+            println(newChannel.id)
         }
     }
 
