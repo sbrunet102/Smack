@@ -31,7 +31,7 @@
             <ListView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@+id/nav_drawer_header_include"
+                android:layout_below="@+id/nav_drawer_header_include"
                 android:id="@+id/channel_list">
             </ListView>
 
