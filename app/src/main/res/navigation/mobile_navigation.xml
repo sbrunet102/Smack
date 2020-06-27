@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/nav_home"
         android:name="com.gmail.sbrunet102.smack.ui.home.HomeFragment"
-        android:label="@string/menu_home"
         tools:layout="@layout/fragment_home">
 
         <action

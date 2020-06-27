@@ -2,6 +2,7 @@ package com.gmail.sbrunet102.smack.services
 
 import android.content.Context
 import android.graphics.Color
+import com.gmail.sbrunet102.smack.controller.App
 import java.util.*
 
 object UserDataService {
@@ -18,9 +19,9 @@ object UserDataService {
         avatarName = ""
         email = ""
         name = ""
-        AuthService.isLoggedIn = false
-        AuthService.userEmail = ""
-        AuthService.authToken = ""
+        App.prefs.userEmail = ""
+        App.prefs.authToken = ""
+        App.prefs.isLoggedIn = false
 
     }
 
