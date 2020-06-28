@@ -24,6 +24,7 @@ import androidx.core.view.GravityCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.gmail.sbrunet102.smack.R
 import com.gmail.sbrunet102.smack.model.Channel
+import com.gmail.sbrunet102.smack.model.Message
 import com.gmail.sbrunet102.smack.services.AuthService
 import com.gmail.sbrunet102.smack.services.MessageService
 import com.gmail.sbrunet102.smack.services.UserDataService
@@ -41,10 +42,11 @@ class MainActivity : AppCompatActivity() {
 
     val socket = IO.socket(SOCKET_URL)
     lateinit var channelAdapter: ArrayAdapter<Channel>
-    var selectedChannel:Channel? = null
+    var selectedChannel: Channel? = null
 
-    private fun setupAdapters(){
-        channelAdapter = ArrayAdapter(this,android.R.layout.simple_list_item_1,MessageService.channels)
+    private fun setupAdapters() {
+        channelAdapter =
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, MessageService.channels)
         channel_list.adapter = channelAdapter
     }
 
@@ -56,6 +58,8 @@ class MainActivity : AppCompatActivity() {
 
         socket.connect()
         socket.on("channelCreated", onNewChannel)
+        socket.on("messageCreated",onNewMessage)
+
 
 //        val fab: FloatingActionButton = findViewById(R.id.fab)
 //        fab.setOnClickListener { view ->
@@ -85,8 +89,8 @@ class MainActivity : AppCompatActivity() {
             updateWithChannel()
         }
 
-        if(App.prefs.isLoggedIn){
-            AuthService.findUserByEmail(this){}
+        if (App.prefs.isLoggedIn) {
+            AuthService.findUserByEmail(this) {}
         }
     }
 
@@ -119,9 +123,9 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
                 loginBtnNavHeader.text = "Logout"
-                MessageService.getChannels { complete->
-                    if(complete){
-                        if (MessageService.channels.count()>0){
+                MessageService.getChannels { complete ->
+                    if (complete) {
+                        if (MessageService.channels.count() > 0) {
                             selectedChannel = MessageService.channels[0]
                             channelAdapter.notifyDataSetChanged()
                             updateWithChannel()
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun updateWithChannel(){
+    fun updateWithChannel() {
         mainChannelName.text = "#${selectedChannel?.name}"
         // download messages for channel
     }
@@ -200,9 +204,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun sendMsgBtnClicked(view: View) {
-        hideKeyBoard()
+    private val onNewMessage = Emitter.Listener { args ->
+    // io.emit("messageCreated",  msg.messageBody, msg.userId, msg.channelId, msg.userName, msg.userAvatar, msg.userAvatarColor, msg.id, msg.timeStamp);
+
+        runOnUiThread {
+            val msgBody = args[0] as String
+            val channelId = args[2] as String
+            val userName = args[3] as String
+            val userAvatar  = args[4] as String
+            val userAvatarColor = args[5]as String
+            val id = args[6]as String
+            val timeStamp = args[7]as String
+
+            val newMessage = Message(msgBody,userName,channelId,userAvatar,userAvatarColor,id,timeStamp)
+            MessageService.messages.add(newMessage)
+            println(newMessage.message)
+
+        }
     }
+
+    fun sendMsgBtnClicked(view: View) {
+        if (App.prefs.isLoggedIn && messageTextField.text.isNotEmpty()&& selectedChannel!=null){
+            val userId = UserDataService.id
+            val channelId = selectedChannel!!.id
+            socket.emit("newMessage",messageTextField.text.toString(),userId,channelId,
+                UserDataService.name,UserDataService.avatarName,UserDataService.avatarColor)
+            messageTextField.text.clear()
+            hideKeyBoard()
+        }
+    }
+
 
     fun hideKeyBoard() {
         val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
